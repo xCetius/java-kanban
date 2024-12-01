@@ -1,3 +1,5 @@
+package main.java;
+
 import java.util.Objects;
 
 public class Task {
@@ -10,6 +12,13 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
+    }
+
+    public Task(Task other) {
+        this.id = other.id;
+        this.name = other.name;
+        this.description = other.description;
+        this.status = other.status;
     }
 
     public String getName() {

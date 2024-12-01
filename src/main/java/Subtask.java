@@ -1,3 +1,5 @@
+package main.java;
+
 public class Subtask extends Task {
     private int epicId;
 
@@ -14,6 +16,11 @@ public class Subtask extends Task {
         this.epicId = epicId;
 
 
+    }
+
+    public Subtask(Subtask other) {
+        super(other);
+        this.epicId = other.epicId;
     }
 
     @Override
