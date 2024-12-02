@@ -2,11 +2,13 @@ package main.java;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    public final HashMap<Integer, Task> tasks = new HashMap<>();
-    public final HashMap<Integer, Epic> epics = new HashMap<>();
-    public final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    public final Map<Integer, Task> tasks = new HashMap<>();
+    public final Map<Integer, Epic> epics = new HashMap<>();
+    public final Map<Integer, Subtask> subtasks = new HashMap<>();
     public final HistoryManager historyManager = Managers.getDefaultHistory();
 
     private int nextId = 1;
@@ -78,9 +80,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void clearSubTasks() {
         subtasks.clear();
-        epics.forEach((k, v) -> v.setStatus(Status.NEW));
-
-
+        epics.forEach((k, v) -> {
+                    v.removeAllSubTasks();
+                    calculateEpicStatus(k);
+                }
+        );
     }
 
     @Override
@@ -105,7 +109,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Subtask getSubTaskById(int id) {
         Subtask task = subtasks.get(id);
         if (task != null) {
-        historyManager.add(task);
+            historyManager.add(task);
         }
         return task;
 
@@ -173,7 +177,7 @@ public class InMemoryTaskManager implements TaskManager {
 
 
     @Override
-    public ArrayList<Subtask> getEpicSubs(int epicId) {
+    public List<Subtask> getEpicSubs(int epicId) {
         Epic epic = epics.get(epicId);
 
         ArrayList<Subtask> subList = new ArrayList<>();
@@ -194,7 +198,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void calculateEpicStatus(int epicId) {
         Epic epic = epics.get(epicId);
 
-        ArrayList<Subtask> subtasks = getEpicSubs(epicId);
+        List<Subtask> subtasks = getEpicSubs(epicId);
 
         // 1. Проверяем, есть ли подзадачи
         if (subtasks.isEmpty()) {

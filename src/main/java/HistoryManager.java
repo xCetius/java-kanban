@@ -1,6 +1,7 @@
 package main.java;
 
-import java.util.ArrayList;
+
+import java.util.List;
 
 public interface HistoryManager {
 
@@ -10,5 +11,5 @@ public interface HistoryManager {
 
     void add(Subtask subtask);
 
-    ArrayList<Task> getHistory();
+    List<Task> getHistory();
 }

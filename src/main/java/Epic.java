@@ -1,9 +1,10 @@
 package main.java;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Epic extends Task {
-    private final ArrayList<Integer> subTasksIds = new ArrayList<>();
+    private final List<Integer> subTasksIds = new ArrayList<>();
 
     public Epic(String name, String description) {
         super(name, description, Status.NEW );
@@ -14,7 +15,7 @@ public class Epic extends Task {
         this.subTasksIds.addAll(other.subTasksIds);
     }
 
-    public ArrayList<Integer> getSubTasksIds() {
+    public List<Integer> getSubTasksIds() {
         return subTasksIds;
     }
 
@@ -34,6 +35,10 @@ public class Epic extends Task {
                 }
             }
         }
+    }
+
+    public void removeAllSubTasks() {
+        subTasksIds.clear();
     }
 
 

@@ -1,6 +1,7 @@
 package main.java;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface TaskManager {
     void add(Task task);
@@ -41,7 +42,7 @@ public interface TaskManager {
 
     void deleteEpicById(int id);
 
-    ArrayList<Subtask> getEpicSubs(int epicId);
+    List<Subtask> getEpicSubs(int epicId);
 
 
 }

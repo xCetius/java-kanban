@@ -1,6 +1,13 @@
 package test.java;
 
-import main.java.*;
+
+import main.java.HistoryManager;
+import main.java.Managers;
+import main.java.Task;
+import main.java.TaskManager;
+import main.java.Status;
+import main.java.Epic;
+import main.java.Subtask;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -155,6 +162,10 @@ public class InMemoryTaskManagerTest {
         //Смена статусов на NEW после очистки всех подзадач
         Assertions.assertEquals(Status.NEW, addedEpic1.getStatus());
         Assertions.assertEquals(Status.NEW, addedEpic2.getStatus());
+
+        //Проверка, что в самих эпиках привязка удалена
+        Assertions.assertEquals(0,addedEpic1.getSubTasksIds().size());
+        Assertions.assertEquals(0,addedEpic2.getSubTasksIds().size());
     }
 
     @Test
@@ -183,12 +194,11 @@ public class InMemoryTaskManagerTest {
     public void HistoryShouldStayAt10Size() {
         Task task1 = new Task("main.java.Task 1", "Description 1", Status.NEW);
         taskManager.add(task1);
-        for (int i = 0;i<12;i++) {
+        for (int i = 0; i < 12; i++) {
             taskManager.getTaskById(task1.getId());
         }
         Assertions.assertEquals(10, historyManager.getHistory().size());
     }
-
 
 
 }
