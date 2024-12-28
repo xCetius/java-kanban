@@ -1,6 +1,5 @@
 package main.java;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public interface TaskManager {
@@ -24,15 +23,15 @@ public interface TaskManager {
 
     Task getTaskById(int id);
 
-    Subtask getSubTaskById(int id);
+    Task getSubTaskById(int id);
 
-    Epic getEpicById(int id);
+    Task getEpicById(int id);
 
-    ArrayList<Task> getTasks();
+    List<Task> getTasks();
 
-    ArrayList<Subtask> getSubTasks();
+    List<Subtask> getSubTasks();
 
-    ArrayList<Epic> getEpics();
+    List<Epic> getEpics();
 
     void deleteTaskById(int id);
 
