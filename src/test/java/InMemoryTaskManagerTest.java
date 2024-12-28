@@ -77,7 +77,7 @@ public class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void EditedTaskShouldNotBeEqualToAdded() {
+    public void testEditedTaskShouldNotBeEqualToAdded() {
         Task addedTask;
         Task task1 = new Task("Task 1", "Description 1", Status.NEW);
         taskManager.add(task1);
@@ -94,7 +94,7 @@ public class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void EditedTaskShouldNotBeEqualToAddedToHistory() {
+    public void testEditedTaskShouldNotBeEqualToAddedToHistory() {
         Task task1 = new Task("Task 1", "Description 1", Status.NEW);
         taskManager.add(task1);
         taskManager.getTaskById(task1.getId());
@@ -114,7 +114,7 @@ public class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void NextIdShouldIncrease() {
+    public void shouldIncreaseNextId() {
         Task task1 = new Task("main.java.Task 1", "Description 1", Status.NEW);
         taskManager.add(task1);
         taskManager.add(task1);
@@ -122,7 +122,7 @@ public class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void EpicShouldChangeStatus() {
+    public void testEpicShouldChangeStatus() {
         Epic addedEpic1;
         Epic addedEpic2;
 
@@ -166,7 +166,7 @@ public class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void ShouldRemoveEpicAndItsSubtasks() {
+    public void shouldRemoveEpicAndItsSubtasks() {
         Epic epic1 = new Epic("Epic 1", "Epic description 1");
         taskManager.add(epic1);
 
