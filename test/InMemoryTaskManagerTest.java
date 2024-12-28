@@ -1,5 +1,3 @@
-package test.java;
-
 import main.java.HistoryManager;
 import main.java.Managers;
 import main.java.Task;
