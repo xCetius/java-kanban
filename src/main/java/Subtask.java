@@ -14,13 +14,16 @@ public class Subtask extends Task {
     public Subtask(String name, String description, Status status, int epicId) {
         super(name, description, status);
         this.epicId = epicId;
-
-
     }
 
     public Subtask(Subtask other) {
         super(other);
         this.epicId = other.epicId;
+    }
+
+    @Override
+    public Subtask clone() {
+        return new Subtask(this);
     }
 
     @Override

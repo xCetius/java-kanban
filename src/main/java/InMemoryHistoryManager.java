@@ -15,9 +15,10 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task taskToAdd) {
-        Task task = new Task(taskToAdd);
-        if (nodeMap.containsKey(task.getId())) {
-            removeNode(nodeMap.get(task.getId()));
+        Task task = taskToAdd.clone();
+        Node<Task> node = nodeMap.get(task.getId());
+        if (node != null) {
+            removeNode(node);
         }
         linkLast(task);
     }
@@ -77,14 +78,4 @@ public class InMemoryHistoryManager implements HistoryManager {
             tail = node.prev;
         }
     }
-
-    //Технический метод для очистки истории для тестов
-    @Override
-    public void techClear() {
-        nodeMap.clear();
-        head = null;
-        tail = null;
-    }
-
-
 }

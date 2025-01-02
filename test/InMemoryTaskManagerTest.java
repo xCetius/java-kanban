@@ -5,6 +5,7 @@ import main.java.TaskManager;
 import main.java.Status;
 import main.java.Epic;
 import main.java.Subtask;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,17 +14,24 @@ import java.util.List;
 
 public class InMemoryTaskManagerTest {
     TaskManager taskManager;
+    Managers managers;
     HistoryManager historyManager = Managers.getDefaultHistory();
-    Managers managers = new Managers();
 
 
     @BeforeEach
     public void beforeEach() {
-
+        managers = new Managers();
         taskManager = managers.getDefault();
-        taskManager.clearTasks();
-        taskManager.clearEpics();
-        historyManager.techClear();
+
+    }
+
+    @AfterEach
+    public void afterEach() {
+        for (int i = 1; i < 4; i++) {
+            taskManager.deleteTaskById(i);
+            taskManager.deleteEpicById(i);
+        }
+
     }
 
     @Test
@@ -71,7 +79,8 @@ public class InMemoryTaskManagerTest {
         Task task1 = new Task("Task 1", "Description 1", Status.NEW);
         task1.setId(25);
         taskManager.add(task1);
-        Assertions.assertNotEquals(taskManager.getTaskById(taskManager.getTasks().getFirst().getId()), 25);
+        int newId = taskManager.getTasks().getFirst().getId();
+        Assertions.assertNotEquals(newId, 25);
     }
 
     @Test
@@ -245,7 +254,30 @@ public class InMemoryTaskManagerTest {
         List<Task> history = historyManager.getHistory();
 
         Assertions.assertEquals(1, history.size());
-        Assertions.assertEquals(task1, history.get(0));
+        Assertions.assertEquals(task1, history.getFirst());
+    }
+
+    @Test
+    void shouldUseCorrectClassToString() {
+
+        Epic epic1 = new Epic("Epic 1", "Epic description");
+        taskManager.add(epic1);
+
+        Subtask subTask1 = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic1.getId());
+        taskManager.add(subTask1);
+
+        taskManager.getEpicById(epic1.getId());
+        taskManager.getSubTaskById(subTask1.getId());
+
+        Task epicInHistory = historyManager.getHistory().getFirst();
+        Task subtaskInHistory = historyManager.getHistory().getLast();
+
+        //Добавляем старому эпику информацию о сабтаске
+        epic1.addSubTasksId(2);
+
+        Assertions.assertEquals(epic1.toString(), epicInHistory.toString());
+        Assertions.assertEquals(subTask1.toString(), subtaskInHistory.toString());
+
     }
 
 

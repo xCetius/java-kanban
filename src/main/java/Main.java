@@ -31,7 +31,6 @@ public class Main {
         taskManager.getEpicById(epic1.getId());
         taskManager.getSubTaskById(subTask1.getId());
 
-
         // Выводим историю
         System.out.println("История просмотров:");
         historyManager.getHistory().forEach(System.out::println);
@@ -45,6 +44,8 @@ public class Main {
         taskManager.deleteEpicById(epic1.getId());
         System.out.println("После удаления Epic 1:");
         historyManager.getHistory().forEach(System.out::println);
+
+
     }
 
 }

@@ -41,6 +41,11 @@ public class Epic extends Task {
         subTasksIds.clear();
     }
 
+    @Override
+    public Epic clone() {
+        return new Epic(this);
+    }
+
 
     @Override
     public String toString() {
