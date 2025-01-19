@@ -2,7 +2,7 @@ import main.java.HistoryManager;
 import main.java.Managers;
 import main.java.Task;
 import main.java.TaskManager;
-import main.java.Status;
+import main.java.enums.Status;
 import main.java.Epic;
 import main.java.Subtask;
 import org.junit.jupiter.api.AfterEach;
@@ -27,10 +27,8 @@ public class InMemoryTaskManagerTest {
 
     @AfterEach
     public void afterEach() {
-        for (int i = 1; i < 4; i++) {
-            taskManager.deleteTaskById(i);
-            taskManager.deleteEpicById(i);
-        }
+        taskManager.clearTasks();
+        taskManager.clearEpics();
 
     }
 
@@ -277,6 +275,36 @@ public class InMemoryTaskManagerTest {
 
         Assertions.assertEquals(epic1.toString(), epicInHistory.toString());
         Assertions.assertEquals(subTask1.toString(), subtaskInHistory.toString());
+
+    }
+
+    @Test
+    void shouldClearTasksAndHistory() {
+        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
+        Task task2 = new Task("Task 2", "Description 2", Status.NEW);
+
+        taskManager.add(task1);
+        taskManager.add(task2);
+
+        Epic epic1 = new Epic("Epic 1", "Epic description");
+
+        taskManager.add(epic1);
+
+        Subtask subTask1 = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic1.getId());
+        taskManager.add(subTask1);
+
+        taskManager.getTaskById(task1.getId());
+        taskManager.getTaskById(task2.getId());
+        taskManager.getEpicById(epic1.getId());
+        taskManager.getSubTaskById(subTask1.getId());
+
+        Assertions.assertNotEquals(historyManager.getHistory().size(), 0);
+
+        taskManager.clearTasks();
+        taskManager.clearEpics();
+
+        Assertions.assertEquals(historyManager.getHistory().size(), 0);
+
 
     }
 

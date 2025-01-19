@@ -1,0 +1,4 @@
+1,TASK,Task 1,NEW,Description 1,
+2,TASK,Task 2,IN_PROGRESS,Description 2,
+3,EPIC,Epic 1,IN_PROGRESS,Epic description,
+4,SUBTASK,Subtask 1,NEW,Subtask description,3

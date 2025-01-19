@@ -1,5 +1,7 @@
 package main.java;
 
+import main.java.enums.Status;
+
 public class Subtask extends Task {
     private int epicId;
 
@@ -13,6 +15,11 @@ public class Subtask extends Task {
 
     public Subtask(String name, String description, Status status, int epicId) {
         super(name, description, status);
+        this.epicId = epicId;
+    }
+
+    public Subtask(int id, String name, Status status, String description, int epicId) {
+        super(id, name, status, description);
         this.epicId = epicId;
     }
 

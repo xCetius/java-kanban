@@ -1,5 +1,7 @@
 package main.java;
 
+import main.java.enums.Status;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +10,10 @@ public class Epic extends Task {
 
     public Epic(String name, String description) {
         super(name, description, Status.NEW);
+    }
+
+    public Epic(int id, String name, Status status, String description) {
+        super(id, name, status, description);
     }
 
     public Epic(Epic other) {
