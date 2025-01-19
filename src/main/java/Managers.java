@@ -1,5 +1,7 @@
 package main.java;
 
+import java.io.File;
+
 public class Managers {
     private final TaskManager taskManager;
     private static final HistoryManager historyManager = new InMemoryHistoryManager();
@@ -17,5 +19,7 @@ public class Managers {
         return historyManager;
     }
 
-
+    public FileBackedTaskManager getFileBackedTaskManager(File file) {
+        return new FileBackedTaskManager(file);
+    }
 }

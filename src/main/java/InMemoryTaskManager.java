@@ -1,5 +1,7 @@
 package main.java;
 
+import main.java.enums.Status;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -53,6 +55,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
 
+
     @Override
     public void update(Epic epic) {
         Epic updatedEpic = epic.clone();
@@ -75,12 +78,18 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearTasks() {
+        for (int id : tasks.keySet()) {
+            historyManager.remove(id);
+        }
         tasks.clear();
 
     }
 
     @Override
     public void clearSubTasks() {
+        for (int id : subtasks.keySet()) {
+            historyManager.remove(id);
+        }
         subtasks.clear();
         epics.forEach((k, v) -> {
                     v.removeAllSubTasks();
@@ -91,6 +100,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearEpics() {
+        for (int id : epics.keySet()) {
+            historyManager.remove(id);
+        }
         epics.clear();
         clearSubTasks();
 
