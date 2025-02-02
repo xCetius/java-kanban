@@ -1,5 +1,8 @@
-package main.java;
+package main.java.managers;
 
+import main.java.domain.Epic;
+import main.java.domain.Subtask;
+import main.java.domain.Task;
 import main.java.enums.Status;
 import main.java.enums.TaskType;
 import main.java.exceptions.ManagerSaveException;
@@ -11,11 +14,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
-    private static final String COLUMN_NAMES = "id,type,name,status,description,epic";
+    public static final String COLUMN_NAMES = "id,type,name,status,description,epic,start_time,duration,end_time";
+    public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyy HH:mm:ss");
 
     FileBackedTaskManager(File file) {
         this.file = file;
@@ -71,26 +78,66 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public String toString(Task task) {
-        return task.getId() + "," + TaskType.TASK + "," + task.getName() + "," + task.getStatus() + "," + task.getDescription() + ",";
+        return task.getId() + ","
+                + TaskType.TASK + ","
+                + task.getName() + ","
+                + task.getStatus() + ","
+                + task.getDescription() + ","
+                + "null,"
+                + task.getStartTime().format(dateTimeFormatter) + ","
+                + task.getDuration().toMinutes() + ","
+                + task.getEndTime().format(dateTimeFormatter);
     }
 
     public String toString(Subtask task) {
-        return task.getId() + "," + TaskType.SUBTASK + "," + task.getName() + "," + task.getStatus() + "," + task.getDescription() + "," + task.getEpicId();
+        return task.getId() + ","
+                + TaskType.SUBTASK + ","
+                + task.getName() + ","
+                + task.getStatus() + ","
+                + task.getDescription() + ","
+                + task.getEpicId() + ","
+                + task.getStartTime().format(dateTimeFormatter) + ","
+                + task.getDuration().toMinutes() + ","
+                + task.getEndTime().format(dateTimeFormatter);
     }
 
     public String toString(Epic task) {
-        return task.getId() + "," + TaskType.EPIC + "," + task.getName() + "," + task.getStatus() + "," + task.getDescription() + ",";
+        return task.getId() + ","
+                + TaskType.EPIC + ","
+                + task.getName() + ","
+                + task.getStatus() + ","
+                + task.getDescription() + ","
+                + "null,"
+                + task.getStartTime().format(dateTimeFormatter) + ","
+                + task.getDuration().toMinutes() + ","
+                + task.getEndTime().format(dateTimeFormatter);
     }
 
     public Task fromString(String value) {
         List<String> list = List.of(value.split(","));
         TaskType taskType = TaskType.valueOf(list.get(1));
         if (taskType == TaskType.TASK) {
-            return new Task(Integer.parseInt(list.get(0)), list.get(2), Status.valueOf(list.get(3)), list.get(4));
+            return new Task(Integer.parseInt(list.get(0)),
+                    list.get(2),
+                    Status.valueOf(list.get(3)),
+                    list.get(4),
+                    LocalDateTime.parse(list.get(6), dateTimeFormatter),
+                    Duration.ofMinutes(Integer.parseInt(list.get(7))));
         } else if (taskType == TaskType.EPIC) {
-            return new Epic(Integer.parseInt(list.get(0)), list.get(2), Status.valueOf(list.get(3)), list.get(4));
+            return new Epic(Integer.parseInt(list.get(0)),
+                    list.get(2),
+                    Status.valueOf(list.get(3)),
+                    list.get(4),
+                    LocalDateTime.parse(list.get(6), dateTimeFormatter),
+                    Duration.ofMinutes(Integer.parseInt(list.get(7))));
         } else {
-            return new Subtask(Integer.parseInt(list.get(0)), list.get(2), Status.valueOf(list.get(3)), list.get(4), Integer.parseInt(list.get(5)));
+            return new Subtask(Integer.parseInt(list.get(0)),
+                    list.get(2),
+                    Status.valueOf(list.get(3)),
+                    list.get(4),
+                    Integer.parseInt(list.get(5)),
+                    LocalDateTime.parse(list.get(6), dateTimeFormatter),
+                    Duration.ofMinutes(Integer.parseInt(list.get(7))));
         }
     }
 

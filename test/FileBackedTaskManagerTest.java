@@ -1,4 +1,9 @@
-import main.java.*;
+
+import main.java.domain.Epic;
+import main.java.managers.FileBackedTaskManager;
+import main.java.managers.Managers;
+import main.java.domain.Subtask;
+import main.java.domain.Task;
 import main.java.enums.Status;
 import main.java.exceptions.ManagerSaveException;
 import org.junit.jupiter.api.AfterEach;
@@ -6,23 +11,37 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static main.java.FileBackedTaskManager.loadFromFile;
+import static main.java.managers.FileBackedTaskManager.loadFromFile;
 
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
-public class FileBackedTaskManagerTest {
-    FileBackedTaskManager taskManager;
+
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
+
 
     File file;
-    File testBackupFile;
+    File testBackupFile = new File("test/resource/TestBackupFile.csv");
     BufferedReader reader;
+
+    @Override
+    protected FileBackedTaskManager createTaskManager() {
+        try {
+            file = File.createTempFile("test", "csv");
+        } catch (IOException e) {
+            throw new RuntimeException("Ошибка при создании временного файла", e);
+        }
+        return Managers.getFileBackedTaskManager(file);
+    }
 
     @BeforeEach
     public void beforeEach() throws IOException {
-        file = File.createTempFile("test", "csv");
-        testBackupFile = new File("test/resource/TestBackupFile.csv");
-        taskManager = Managers.getFileBackedTaskManager(file);
         reader = new BufferedReader(new FileReader(file));
 
     }
@@ -42,7 +61,7 @@ public class FileBackedTaskManagerTest {
     public void shouldSaveEmptyFile() throws ManagerSaveException {
         taskManager.save();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            Assertions.assertEquals("id,type,name,status,description,epic", reader.readLine());
+            Assertions.assertEquals(FileBackedTaskManager.COLUMN_NAMES, reader.readLine());
             Assertions.assertNull(reader.readLine());
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -57,8 +76,8 @@ public class FileBackedTaskManagerTest {
     @Test
     public void shouldSaveTasks() throws IOException {
 
-        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
-        Task task2 = new Task("Task 2", "Description 2", Status.IN_PROGRESS);
+        Task task1 = new Task("Task 1", "Description 1", Status.NEW, task1StartTime, task1Duration);
+        Task task2 = new Task("Task 2", "Description 2", Status.IN_PROGRESS, task2StartTime, task2Duration);
 
         taskManager.add(task1);
         taskManager.add(task2);
@@ -67,13 +86,16 @@ public class FileBackedTaskManagerTest {
 
         taskManager.add(epic1);
 
-        Subtask subTask1 = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic1.getId());
+        Subtask subTask1 = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic1.getId(), subtask1StartTime, subtask1Duration);
 
         taskManager.add(subTask1);
 
+        epic1.setStartTime(subtask1StartTime);
+        epic1.setDuration(subtask1Duration);
+
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            Assertions.assertEquals("id,type,name,status,description,epic", reader.readLine());
+            Assertions.assertEquals(FileBackedTaskManager.COLUMN_NAMES, reader.readLine());
             Assertions.assertEquals(taskManager.toString(task1), reader.readLine());
             Assertions.assertEquals(taskManager.toString(task2), reader.readLine());
             Assertions.assertEquals(taskManager.toString(epic1), reader.readLine());
@@ -84,10 +106,10 @@ public class FileBackedTaskManagerTest {
     @Test
     public void shouldLoadMultipleTasks() throws ManagerSaveException {
 
-        Task task1 = new Task(1, "Task 1", Status.NEW, "Description 1");
-        Task task2 = new Task(2, "Task 2", Status.IN_PROGRESS, "Description 2");
+        Task task1 = new Task(1, "Task 1", Status.NEW, "Description 1", task1StartTime, task1Duration);
+        Task task2 = new Task(2, "Task 2", Status.IN_PROGRESS, "Description 2", task2StartTime, task2Duration);
         Epic epic1 = new Epic(3, "Epic 1", Status.NEW, "Epic description");
-        Subtask subTask1 = new Subtask(4, "Subtask 1", Status.NEW, "Subtask description", 3);
+        Subtask subTask1 = new Subtask(4, "Subtask 1", Status.NEW, "Subtask description", 3, subtask1StartTime, subtask1Duration);
 
 
         FileBackedTaskManager loadedManager = loadFromFile(testBackupFile);
@@ -103,8 +125,8 @@ public class FileBackedTaskManagerTest {
 
         Assertions.assertEquals(task1, tasks.get(0));
         Assertions.assertEquals(task2, tasks.get(1));
-        Assertions.assertEquals(epic1, epics.get(0));
-        Assertions.assertEquals(subTask1, subtasks.get(0));
+        Assertions.assertEquals(epic1, epics.getFirst());
+        Assertions.assertEquals(subTask1, subtasks.getFirst());
     }
 
     @Test
@@ -117,7 +139,7 @@ public class FileBackedTaskManagerTest {
         List<Epic> loadedEpics = loadedManager.getEpics();
 
         Assertions.assertEquals(1, loadedEpics.size());
-        Assertions.assertEquals(epic, loadedEpics.get(0));
+        Assertions.assertEquals(epic, loadedEpics.getFirst());
     }
 
     @Test
@@ -125,7 +147,7 @@ public class FileBackedTaskManagerTest {
         Epic epic = new Epic("Epic 1", "Epic description");
         taskManager.add(epic);
 
-        Subtask subtask = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic.getId());
+        Subtask subtask = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic.getId(), subtask1StartTime, subtask1Duration);
         taskManager.add(subtask);
 
         FileBackedTaskManager loadedManager = loadFromFile(file);
@@ -134,16 +156,16 @@ public class FileBackedTaskManagerTest {
         List<Subtask> loadedSubtasks = loadedManager.getSubTasks();
 
         Assertions.assertEquals(1, loadedEpics.size());
-        Assertions.assertEquals(epic, loadedEpics.get(0));
+        Assertions.assertEquals(epic, loadedEpics.getFirst());
 
         Assertions.assertEquals(1, loadedSubtasks.size());
-        Assertions.assertEquals(subtask, loadedSubtasks.get(0));
-        Assertions.assertEquals(epic.getId(), loadedSubtasks.get(0).getEpicId());
+        Assertions.assertEquals(subtask, loadedSubtasks.getFirst());
+        Assertions.assertEquals(epic.getId(), loadedSubtasks.getFirst().getEpicId());
     }
 
     @Test
     public void shouldSaveAndLoadTasksAfterUpdate() throws ManagerSaveException {
-        Task task = new Task("Task 1", "Task description", Status.NEW);
+        Task task = new Task("Task 1", "Task description", Status.NEW, task1StartTime, task1Duration);
         taskManager.add(task);
 
         task.setName("Updated Task 1");
@@ -156,18 +178,18 @@ public class FileBackedTaskManagerTest {
         List<Task> loadedTasks = loadedManager.getTasks();
 
         Assertions.assertEquals(1, loadedTasks.size());
-        Assertions.assertEquals(task, loadedTasks.get(0));
+        Assertions.assertEquals(task, loadedTasks.getFirst());
     }
 
     @Test
     public void shouldClearAllTasksAndSave() throws ManagerSaveException {
-        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
+        Task task1 = new Task("Task 1", "Description 1", Status.NEW, task1StartTime, task1Duration);
         taskManager.add(task1);
 
         Epic epic1 = new Epic("Epic 1", "Epic description");
         taskManager.add(epic1);
 
-        Subtask subtask1 = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic1.getId());
+        Subtask subtask1 = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic1.getId(), subtask1StartTime, subtask1Duration);
         taskManager.add(subtask1);
 
 
@@ -184,7 +206,7 @@ public class FileBackedTaskManagerTest {
 
     @Test
     public void shouldDeleteTaskById() throws ManagerSaveException {
-        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
+        Task task1 = new Task("Task 1", "Description 1", Status.NEW, task1StartTime, task1Duration);
         taskManager.add(task1);
 
         taskManager.deleteTaskById(task1.getId());
@@ -199,7 +221,7 @@ public class FileBackedTaskManagerTest {
         Epic epic = new Epic("Epic 1", "Epic description");
         taskManager.add(epic);
 
-        Subtask subtask = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic.getId());
+        Subtask subtask = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic.getId(), subtask1StartTime, subtask1Duration);
         taskManager.add(subtask);
 
         taskManager.deleteEpicById(epic.getId());
@@ -209,7 +231,31 @@ public class FileBackedTaskManagerTest {
         Assertions.assertTrue(loadedManager.getEpics().isEmpty());
         Assertions.assertTrue(loadedManager.getSubTasks().isEmpty());
     }
+
+    @Test
+    public void testSaveThrowsExceptionWhenFileIsNotWritable() {
+        // Создаем путь к файлу, который недоступен для записи (например, директория)
+        Path unwritableFile = Paths.get("/unwritable/directory/file.txt");
+
+        FileBackedTaskManager badManager = Managers.getFileBackedTaskManager(unwritableFile.toFile());
+
+        Assertions.assertThrows(ManagerSaveException.class, badManager::save, "Метод save() должен выбрасывать ManagerSaveException, если файл недоступен для записи");
+    }
+
+    @Test
+    public void testSaveDoesNotThrowExceptionWhenFileIsWritable() {
+        // Создаем путь к временному файлу, который доступен для записи
+        Path writableFile = Paths.get("temp_file.txt");
+
+        FileBackedTaskManager goodManager = Managers.getFileBackedTaskManager(writableFile.toFile());
+
+        Assertions.assertDoesNotThrow(goodManager::save, "Метод save() не должен выбрасывать исключение, если файл доступен для записи");
+
+    }
 }
+
+
+
 
 
 
