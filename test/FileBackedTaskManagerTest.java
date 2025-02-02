@@ -13,17 +13,16 @@ import java.util.List;
 
 public class FileBackedTaskManagerTest {
     FileBackedTaskManager taskManager;
-    Managers managers;
+
     File file;
     File testBackupFile;
     BufferedReader reader;
 
     @BeforeEach
     public void beforeEach() throws IOException {
-        managers = new Managers();
         file = File.createTempFile("test", "csv");
         testBackupFile = new File("test/resource/TestBackupFile.csv");
-        taskManager = managers.getFileBackedTaskManager(file);
+        taskManager = Managers.getFileBackedTaskManager(file);
         reader = new BufferedReader(new FileReader(file));
 
     }
@@ -37,7 +36,6 @@ public class FileBackedTaskManagerTest {
     @Test
     public void shouldBeNotNull() {
         Assertions.assertNotNull(taskManager);
-        Assertions.assertNotNull(managers);
     }
 
     @Test
@@ -52,7 +50,7 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    public void shouldLoadEmptyFile() throws IOException {
+    public void shouldLoadEmptyFile() throws ManagerSaveException {
         loadFromFile(file);
     }
 
@@ -84,7 +82,7 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    public void shouldLoadMultipleTasks() throws IOException {
+    public void shouldLoadMultipleTasks() throws ManagerSaveException {
 
         Task task1 = new Task(1, "Task 1", Status.NEW, "Description 1");
         Task task2 = new Task(2, "Task 2", Status.IN_PROGRESS, "Description 2");
@@ -110,7 +108,7 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    public void shouldSaveAndLoadEpicWithoutSubtasks() throws IOException {
+    public void shouldSaveAndLoadEpicWithoutSubtasks() throws ManagerSaveException {
         Epic epic = new Epic("Epic 1", "Epic description");
         taskManager.add(epic);
 
@@ -123,7 +121,7 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    public void shouldSaveAndLoadSubtaskLinkedToEpic() throws IOException {
+    public void shouldSaveAndLoadSubtaskLinkedToEpic() throws ManagerSaveException {
         Epic epic = new Epic("Epic 1", "Epic description");
         taskManager.add(epic);
 
@@ -144,7 +142,7 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    public void shouldSaveAndLoadTasksAfterUpdate() throws IOException {
+    public void shouldSaveAndLoadTasksAfterUpdate() throws ManagerSaveException {
         Task task = new Task("Task 1", "Task description", Status.NEW);
         taskManager.add(task);
 
@@ -162,7 +160,7 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    public void shouldClearAllTasksAndSave() throws IOException {
+    public void shouldClearAllTasksAndSave() throws ManagerSaveException {
         Task task1 = new Task("Task 1", "Description 1", Status.NEW);
         taskManager.add(task1);
 
@@ -185,7 +183,7 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    public void shouldDeleteTaskById() throws IOException {
+    public void shouldDeleteTaskById() throws ManagerSaveException {
         Task task1 = new Task("Task 1", "Description 1", Status.NEW);
         taskManager.add(task1);
 
@@ -197,7 +195,7 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    public void shouldDeleteEpicWithSubtasks() throws IOException {
+    public void shouldDeleteEpicWithSubtasks() throws ManagerSaveException {
         Epic epic = new Epic("Epic 1", "Epic description");
         taskManager.add(epic);
 

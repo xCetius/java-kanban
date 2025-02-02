@@ -1,4 +1,5 @@
 import main.java.HistoryManager;
+import main.java.InMemoryTaskManager;
 import main.java.Managers;
 import main.java.Task;
 import main.java.TaskManager;
@@ -14,15 +15,12 @@ import java.util.List;
 
 public class InMemoryTaskManagerTest {
     TaskManager taskManager;
-    Managers managers;
-    HistoryManager historyManager = Managers.getDefaultHistory();
+    HistoryManager historyManager = InMemoryTaskManager.historyManager;
 
 
     @BeforeEach
     public void beforeEach() {
-        managers = new Managers();
-        taskManager = managers.getDefault();
-
+        taskManager = Managers.getDefault();
     }
 
     @AfterEach

@@ -11,7 +11,7 @@ public class InMemoryTaskManager implements TaskManager {
     public final Map<Integer, Task> tasks = new HashMap<>();
     public final Map<Integer, Epic> epics = new HashMap<>();
     public final Map<Integer, Subtask> subtasks = new HashMap<>();
-    public final HistoryManager historyManager = Managers.getDefaultHistory();
+    public static final HistoryManager historyManager = Managers.getDefaultHistory();
 
     private int nextId = 1;
 
@@ -221,10 +221,10 @@ public class InMemoryTaskManager implements TaskManager {
     public void calculateEpicStatus(int epicId) {
         Epic epic = epics.get(epicId);
 
-        List<Subtask> subtasks = getEpicSubs(epicId);
+        List<Subtask> epicSubs = getEpicSubs(epicId);
 
         // 1. Проверяем, есть ли подзадачи
-        if (subtasks.isEmpty()) {
+        if (epicSubs.isEmpty()) {
             epic.setStatus(Status.NEW);
             return;
         }
@@ -233,7 +233,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean allNew = true;
         boolean allDone = true;
 
-        for (Subtask subtask : subtasks) {
+        for (Subtask subtask : epicSubs) {
             if (subtask.getStatus() != Status.NEW) {
                 allNew = false;
             }

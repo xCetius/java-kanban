@@ -4,23 +4,30 @@ import main.java.enums.Status;
 import main.java.enums.TaskType;
 import main.java.exceptions.ManagerSaveException;
 
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
+    private static final String COLUMN_NAMES = "id,type,name,status,description,epic";
 
     FileBackedTaskManager(File file) {
         this.file = file;
     }
 
-    public static FileBackedTaskManager loadFromFile(File file) throws IOException {
+    public static FileBackedTaskManager loadFromFile(File file) throws ManagerSaveException {
         FileBackedTaskManager manager = new FileBackedTaskManager(file);
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             while (reader.ready()) {
                 String line = reader.readLine();
-                if (line.equals("id,type,name,status,description,epic")) {
+                if (line.equals(COLUMN_NAMES)) {
                     continue;
                 }
                 Task task = manager.fromString(line);
@@ -44,7 +51,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             StringBuilder result = new StringBuilder();
 
-            writer.write("id,type,name,status,description,epic\n");
+            writer.write(COLUMN_NAMES + "\n");
 
             for (Task task : getTasks()) {
                 result.append(toString(task)).append("\n");
@@ -91,31 +98,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     @Override
     public void add(Subtask subtask) {
         super.add(subtask);
-        try {
-            save();
-        } catch (ManagerSaveException e) {
-            e.printStackTrace();
-        }
+        save();
     }
 
     @Override
     public void add(Epic epic) {
         super.add(epic);
-        try {
-            save();
-        } catch (ManagerSaveException e) {
-            e.printStackTrace();
-        }
+        save();
     }
 
     @Override
     public void add(Task task) {
         super.add(task);
-        try {
-            save();
-        } catch (ManagerSaveException e) {
-            e.printStackTrace();
-        }
+        save();
     }
 
     private void load(Subtask subtask) {
@@ -125,102 +120,65 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private void load(Epic epic) {
         super.add(epic);
-
     }
 
     private void load(Task task) {
         super.add(task);
-
     }
 
     @Override
     public void update(Task task) {
         super.update(task);
-        try {
-            save();
-        } catch (ManagerSaveException e) {
-            e.printStackTrace();
-        }
+        save();
     }
 
     @Override
     public void update(Epic epic) {
         super.update(epic);
-        try {
-            save();
-        } catch (ManagerSaveException e) {
-            e.printStackTrace();
-        }
+        save();
     }
 
     @Override
     public void update(Subtask subtask) {
         super.update(subtask);
-        try {
-            save();
-        } catch (ManagerSaveException e) {
-            e.printStackTrace();
-        }
+        save();
+
     }
 
     @Override
     public void clearTasks() {
         super.clearTasks();
-        try {
-            save();
-        } catch (ManagerSaveException e) {
-            e.printStackTrace();
-        }
+        save();
     }
 
     @Override
     public void clearSubTasks() {
         super.clearSubTasks();
-        try {
-            save();
-        } catch (ManagerSaveException e) {
-            e.printStackTrace();
-        }
+        save();
     }
 
     @Override
     public void clearEpics() {
         super.clearEpics();
-        try {
-            save();
-        } catch (ManagerSaveException e) {
-            e.printStackTrace();
-        }
+        save();
     }
 
     @Override
     public void deleteTaskById(int id) {
         super.deleteTaskById(id);
-        try {
-            save();
-        } catch (ManagerSaveException e) {
-            e.printStackTrace();
-        }
+        save();
     }
 
     @Override
     public void deleteSubTaskById(int id) {
         super.deleteSubTaskById(id);
-        try {
-            save();
-        } catch (ManagerSaveException e) {
-            e.printStackTrace();
-        }
+        save();
     }
 
     @Override
     public void deleteEpicById(int id) {
         super.deleteEpicById(id);
-        try {
-            save();
-        } catch (ManagerSaveException e) {
-            e.printStackTrace();
-        }
+        save();
     }
 
 
