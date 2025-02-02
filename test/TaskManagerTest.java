@@ -100,15 +100,15 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void shouldReturnPrioritizedTasksOrderedByStartTime() {
         Task task1 = new Task("Task1", "Desc", Status.NEW,
-                LocalDateTime.now().plusHours(2), Duration.ofHours(1));
+                task1StartTime.plusHours(2), Duration.ofHours(1));
         Task task2 = new Task("Task2", "Desc", Status.NEW,
-                LocalDateTime.now().plusHours(1), Duration.ofHours(1));
+                task2StartTime.plusHours(1), Duration.ofHours(1));
 
         taskManager.add(task1);
         taskManager.add(task2);
 
         List<Task> prioritized = taskManager.getPrioritizedTasks();
-        assertEquals(List.of(task2, task1), prioritized);
+        assertEquals(List.of(task1, task2), prioritized);
     }
 
 
