@@ -1,4 +1,6 @@
-package main.java;
+package main.java.managers;
+
+import main.java.domain.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;

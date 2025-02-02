@@ -1,11 +1,11 @@
-package main.java;
+package main.java.managers;
 
 import java.io.File;
 
 public class Managers {
 
 
-    public static TaskManager getDefault() {
+    public static InMemoryTaskManager getDefault() {
         return new InMemoryTaskManager();
     }
 
