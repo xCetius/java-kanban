@@ -1,5 +1,7 @@
 package main.java;
 
+import main.java.enums.Status;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -9,7 +11,7 @@ public class InMemoryTaskManager implements TaskManager {
     public final Map<Integer, Task> tasks = new HashMap<>();
     public final Map<Integer, Epic> epics = new HashMap<>();
     public final Map<Integer, Subtask> subtasks = new HashMap<>();
-    public final HistoryManager historyManager = Managers.getDefaultHistory();
+    public static final HistoryManager historyManager = Managers.getDefaultHistory();
 
     private int nextId = 1;
 
@@ -53,6 +55,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
 
+
     @Override
     public void update(Epic epic) {
         Epic updatedEpic = epic.clone();
@@ -75,12 +78,18 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearTasks() {
+        for (int id : tasks.keySet()) {
+            historyManager.remove(id);
+        }
         tasks.clear();
 
     }
 
     @Override
     public void clearSubTasks() {
+        for (int id : subtasks.keySet()) {
+            historyManager.remove(id);
+        }
         subtasks.clear();
         epics.forEach((k, v) -> {
                     v.removeAllSubTasks();
@@ -91,6 +100,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearEpics() {
+        for (int id : epics.keySet()) {
+            historyManager.remove(id);
+        }
         epics.clear();
         clearSubTasks();
 
@@ -209,10 +221,10 @@ public class InMemoryTaskManager implements TaskManager {
     public void calculateEpicStatus(int epicId) {
         Epic epic = epics.get(epicId);
 
-        List<Subtask> subtasks = getEpicSubs(epicId);
+        List<Subtask> epicSubs = getEpicSubs(epicId);
 
         // 1. Проверяем, есть ли подзадачи
-        if (subtasks.isEmpty()) {
+        if (epicSubs.isEmpty()) {
             epic.setStatus(Status.NEW);
             return;
         }
@@ -221,7 +233,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean allNew = true;
         boolean allDone = true;
 
-        for (Subtask subtask : subtasks) {
+        for (Subtask subtask : epicSubs) {
             if (subtask.getStatus() != Status.NEW) {
                 allNew = false;
             }

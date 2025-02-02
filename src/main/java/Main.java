@@ -1,11 +1,13 @@
 package main.java;
 
+import main.java.enums.Status;
+
 public class Main {
     public static void main(String[] args) {
-        Managers managers = new Managers();
 
-        TaskManager taskManager = managers.getDefault();
-        HistoryManager historyManager = Managers.getDefaultHistory();
+
+        TaskManager taskManager = Managers.getDefault();
+        HistoryManager historyManager = InMemoryTaskManager.historyManager;
 
         // Создаём задачи
         Task task1 = new Task("Task 1", "Description 1", Status.NEW);
