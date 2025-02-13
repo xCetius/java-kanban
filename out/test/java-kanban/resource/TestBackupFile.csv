@@ -1,5 +1,0 @@
-id,type,name,status,description,epic,start_time,duration,end_time
-1,TASK,Task 1,NEW,Description 1,null,03-02-2025 18:57:17,60,03-02-2025 19:57:17
-2,TASK,Task 2,IN_PROGRESS,Description 2,null,04-02-2025 18:57:17,120,04-02-2025 20:57:17
-3,EPIC,Epic 1,IN_PROGRESS,Epic description,null,06-02-2025 18:57:17,900,07-02-2025 09:57:17
-4,SUBTASK,Subtask 1,NEW,Subtask description,3,06-02-2025 18:57:17,240,06-02-2025 22:57:17

@@ -37,7 +37,6 @@ public class Epic extends Task {
 
         Duration duration =
                 subTasksIds.stream()
-                        //.filter(subtasks::containsKey)
                         .map(subtasks::get)
                         .map(Task::getDuration)
                         .filter(Objects::nonNull)
