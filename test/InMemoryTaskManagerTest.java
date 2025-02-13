@@ -1,26 +1,38 @@
-import main.java.HistoryManager;
-import main.java.InMemoryTaskManager;
-import main.java.Managers;
-import main.java.Task;
-import main.java.TaskManager;
+import main.java.managers.HistoryManager;
+import main.java.managers.InMemoryTaskManager;
+import main.java.managers.Managers;
+import main.java.domain.Task;
 import main.java.enums.Status;
-import main.java.Epic;
-import main.java.Subtask;
+import main.java.domain.Epic;
+import main.java.domain.Subtask;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
-public class InMemoryTaskManagerTest {
-    TaskManager taskManager;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
+
     HistoryManager historyManager = InMemoryTaskManager.historyManager;
 
 
-    @BeforeEach
-    public void beforeEach() {
-        taskManager = Managers.getDefault();
+    private boolean isOverlapping(Task task1, Task task2) {
+        LocalDateTime start1 = task1.getStartTime();
+        LocalDateTime end1 = task1.getEndTime();
+        LocalDateTime start2 = task2.getStartTime();
+        LocalDateTime end2 = task2.getEndTime();
+
+        return start1.isBefore(end2) && start2.isBefore(end1);
+    }
+
+    @Override
+    protected InMemoryTaskManager createTaskManager() {
+        return Managers.getDefault();
     }
 
     @AfterEach
@@ -96,29 +108,10 @@ public class InMemoryTaskManagerTest {
 
     }
 
-    @Test
-    public void testEditedTaskShouldNotBeEqualToAddedToHistory() {
-        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
-        taskManager.add(task1);
-        taskManager.getTaskById(task1.getId());
-
-        task1.setId(15);
-        task1.setDescription("Description 2");
-        task1.setStatus(Status.IN_PROGRESS);
-        task1.setName("Task 2");
-
-        Task taskFromHistory = historyManager.getHistory().getFirst();
-
-        Assertions.assertNotEquals(task1.getId(), taskFromHistory.getId());
-        Assertions.assertNotEquals(task1.getDescription(), taskFromHistory.getDescription());
-        Assertions.assertNotEquals(task1.getName(), taskFromHistory.getName());
-        Assertions.assertNotEquals(task1.getStatus(), taskFromHistory.getStatus());
-
-    }
 
     @Test
     public void shouldIncreaseNextId() {
-        Task task1 = new Task("main.java.Task 1", "Description 1", Status.NEW);
+        Task task1 = new Task("main.java.domain.Task 1", "Description 1", Status.NEW);
         taskManager.add(task1);
         taskManager.add(task1);
         Assertions.assertEquals(2, taskManager.getTasks().getLast().getId());
@@ -190,67 +183,12 @@ public class InMemoryTaskManagerTest {
         Assertions.assertEquals(0, taskManager.getSubTasks().size());
     }
 
-    @Test
-    void shouldAddTasksToHistory() {
-        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
-        Task task2 = new Task("Task 2", "Description 2", Status.NEW);
-
-        taskManager.add(task1);
-        taskManager.add(task2);
-
-        taskManager.getTaskById(1);
-        taskManager.getTaskById(2);
-
-
-        List<Task> history = historyManager.getHistory();
-
-        Assertions.assertEquals(2, history.size());
-        Assertions.assertEquals(task1, history.get(0));
-        Assertions.assertEquals(task2, history.get(1));
-    }
-
-    @Test
-    void shouldUpdateTaskPositionWhenReAdded() {
-        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
-        Task task2 = new Task("Task 2", "Description 2", Status.NEW);
-
-        taskManager.add(task1);
-        taskManager.add(task2);
-
-        taskManager.getTaskById(1);
-        taskManager.getTaskById(2);
-        taskManager.getTaskById(1);// Добавляем task1 повторно
-
-        List<Task> history = historyManager.getHistory();
-
-        Assertions.assertEquals(2, history.size());
-        Assertions.assertEquals(task2, history.get(0));
-        Assertions.assertEquals(task1, history.get(1));
-    }
 
     @Test
     void shouldReturnEmptyHistoryWhenNoTasks() {
         List<Task> history = historyManager.getHistory();
 
-        Assertions.assertTrue(history.isEmpty());
-    }
-
-    @Test
-    void shouldDoNothingWhenRemovingNonexistentTask() {
-
-
-        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
-
-        taskManager.add(task1);
-        taskManager.getTaskById(1);
-
-
-        historyManager.remove(2);
-
-        List<Task> history = historyManager.getHistory();
-
-        Assertions.assertEquals(1, history.size());
-        Assertions.assertEquals(task1, history.getFirst());
+        assertTrue(history.isEmpty());
     }
 
     @Test
@@ -259,7 +197,7 @@ public class InMemoryTaskManagerTest {
         Epic epic1 = new Epic("Epic 1", "Epic description");
         taskManager.add(epic1);
 
-        Subtask subTask1 = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic1.getId());
+        Subtask subTask1 = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic1.getId(), super.subtask1StartTime, super.subtask1Duration);
         taskManager.add(subTask1);
 
         taskManager.getEpicById(epic1.getId());
@@ -268,8 +206,11 @@ public class InMemoryTaskManagerTest {
         Task epicInHistory = historyManager.getHistory().getFirst();
         Task subtaskInHistory = historyManager.getHistory().getLast();
 
-        //Добавляем старому эпику информацию о сабтаске
+        //Добавляем старому эпику недостающие данные
         epic1.addSubTasksId(2);
+        epic1.setStartTime(taskManager.getEpicById(1).getStartTime());
+        epic1.setDuration(taskManager.getEpicById(1).getDuration());
+
 
         Assertions.assertEquals(epic1.toString(), epicInHistory.toString());
         Assertions.assertEquals(subTask1.toString(), subtaskInHistory.toString());
@@ -277,33 +218,27 @@ public class InMemoryTaskManagerTest {
     }
 
     @Test
-    void shouldClearTasksAndHistory() {
-        Task task1 = new Task("Task 1", "Description 1", Status.NEW);
-        Task task2 = new Task("Task 2", "Description 2", Status.NEW);
+    void shouldDetectOverlappingTasks() {
+        Task task1 = new Task(1, "Task 1", Status.NEW, "Desc", LocalDateTime.of(2024, 2, 1, 10, 0), Duration.ofMinutes(60));
+        Task task2 = new Task(2, "Task 2", Status.NEW, "Desc", LocalDateTime.of(2024, 2, 1, 10, 30), Duration.ofMinutes(60));
 
-        taskManager.add(task1);
-        taskManager.add(task2);
+        assertTrue(isOverlapping(task1, task2));
+    }
 
-        Epic epic1 = new Epic("Epic 1", "Epic description");
+    @Test
+    void shouldNotDetectOverlapForNonOverlappingTasks() {
+        Task task1 = new Task(1, "Task 1", Status.NEW, "Desc", LocalDateTime.of(2024, 2, 1, 10, 0), Duration.ofMinutes(59));
+        Task task2 = new Task(2, "Task 2", Status.NEW, "Desc", LocalDateTime.of(2024, 2, 1, 11, 0), Duration.ofMinutes(60));
 
-        taskManager.add(epic1);
+        assertFalse(isOverlapping(task1, task2));
+    }
 
-        Subtask subTask1 = new Subtask("Subtask 1", "Subtask description", Status.NEW, epic1.getId());
-        taskManager.add(subTask1);
+    @Test
+    void shouldDetectOverlapWhenTasksTouch() {
+        Task task1 = new Task(1, "Task 1", Status.NEW, "Desc", LocalDateTime.of(2024, 2, 1, 10, 0), Duration.ofMinutes(60));
+        Task task2 = new Task(2, "Task 2", Status.NEW, "Desc", LocalDateTime.of(2024, 2, 1, 11, 0), Duration.ofMinutes(60));
 
-        taskManager.getTaskById(task1.getId());
-        taskManager.getTaskById(task2.getId());
-        taskManager.getEpicById(epic1.getId());
-        taskManager.getSubTaskById(subTask1.getId());
-
-        Assertions.assertNotEquals(historyManager.getHistory().size(), 0);
-
-        taskManager.clearTasks();
-        taskManager.clearEpics();
-
-        Assertions.assertEquals(historyManager.getHistory().size(), 0);
-
-
+        assertFalse(isOverlapping(task1, task2));
     }
 
 

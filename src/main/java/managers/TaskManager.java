@@ -1,4 +1,8 @@
-package main.java;
+package main.java.managers;
+
+import main.java.domain.Epic;
+import main.java.domain.Subtask;
+import main.java.domain.Task;
 
 import java.util.List;
 
@@ -42,6 +46,8 @@ public interface TaskManager {
     void deleteEpicById(int id);
 
     List<Subtask> getEpicSubs(int epicId);
+
+    List<Task> getPrioritizedTasks();
 
 
 }
