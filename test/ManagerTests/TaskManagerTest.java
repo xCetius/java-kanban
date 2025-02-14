@@ -1,3 +1,5 @@
+package ManagerTests;
+
 import main.java.domain.Epic;
 import main.java.domain.Subtask;
 import main.java.domain.Task;
@@ -9,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +25,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
     LocalDateTime subtask1StartTime = LocalDateTime.now().plusDays(4);
     Duration subtask2Duration = Duration.ofHours(4);
     LocalDateTime subtask2StartTime = LocalDateTime.now().plusDays(5);
-    protected static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyy HH:mm:ss");
 
     protected abstract T createTaskManager();
 
@@ -120,7 +120,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask = new Subtask("Sub", "Desc", Status.NEW, epic.getId(), subtask1StartTime, subtask1Duration);
         taskManager.add(subtask);
 
-        Epic loadedEpic = (Epic) taskManager.getEpicById(epic.getId());
+        Epic loadedEpic = taskManager.getEpicById(epic.getId());
 
         assertEquals(epic.getId(), subtask.getEpicId());
         assertTrue(loadedEpic.getSubTasksIds().contains(subtask.getId()));
