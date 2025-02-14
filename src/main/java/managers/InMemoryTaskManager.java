@@ -4,6 +4,7 @@ import main.java.domain.Epic;
 import main.java.domain.Subtask;
 import main.java.domain.Task;
 import main.java.enums.Status;
+import main.java.exceptions.TaskNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -73,6 +74,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void update(Task task) {
         Task updatedTask = task.clone();
+        if (!tasks.containsKey(updatedTask.getId())) {
+            throw new TaskNotFoundException();
+        }
         tasks.put(updatedTask.getId(), updatedTask);
         if (hasStartTime(updatedTask)) {
             if (hasOverlap(updatedTask)) {
@@ -88,6 +92,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void update(Epic epic) {
         Epic updatedEpic = epic.clone();
+        if (!epics.containsKey(updatedEpic.getId())) {
+            throw new TaskNotFoundException();
+        }
         epics.put(updatedEpic.getId(), updatedEpic);
 
     }
@@ -95,7 +102,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void update(Subtask subtask) {
         Subtask oldSubtask = subtasks.get(subtask.getId());
+        if (oldSubtask == null) {
+            throw new TaskNotFoundException();
+        }
         Subtask newSubtask = subtask.clone();
+
         if (newSubtask.getEpicId() != oldSubtask.getEpicId()) { //Если мы решили поменять у сабтаски эпик
             Epic oldEpic = getEpicBySubId(oldSubtask.getId());
             oldEpic.removeSubTasksId(oldSubtask.getId()); //удаляем из старого эпика привязку
@@ -151,10 +162,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTaskById(int id) {
         Task task = tasks.get(id);
-        if (task != null) {
-            historyManager.add(task);
+        if (task == null) {
+            throw new TaskNotFoundException();
         }
-
+        historyManager.add(task);
         return task;
 
     }
@@ -162,9 +173,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask getSubTaskById(int id) {
         Subtask subtask = subtasks.get(id);
-        if (subtask != null) {
-            historyManager.add(subtask);
+        if (subtask == null) {
+            throw new TaskNotFoundException();
         }
+        historyManager.add(subtask);
         return subtask;
 
     }
@@ -172,9 +184,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Epic getEpicById(int id) {
         Epic epic = epics.get(id);
-        if (epic != null) {
-            historyManager.add(epic);
+        if (epic == null) {
+            throw new TaskNotFoundException();
         }
+        historyManager.add(epic);
         return epic;
 
     }
@@ -182,6 +195,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Task> getTasks() {
         return new ArrayList<>(tasks.values());
+
     }
 
     @Override
@@ -247,7 +261,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Subtask> getEpicSubs(int epicId) {
         Epic epic = epics.get(epicId);
-
+        if (epic == null) {
+            throw new TaskNotFoundException();
+        }
         List<Subtask> subList = new ArrayList<>();
 
 

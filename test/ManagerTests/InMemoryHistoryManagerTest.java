@@ -1,3 +1,5 @@
+package ManagerTests;
+
 import main.java.domain.Epic;
 import main.java.managers.HistoryManager;
 import main.java.managers.InMemoryTaskManager;
